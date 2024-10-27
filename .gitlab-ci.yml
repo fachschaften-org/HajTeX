@@ -1,0 +1,71 @@
+---
+stages:
+  - docker
+
+.docker_template:
+  stage: docker
+  tags:
+    - docker
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  services:
+    - name: docker:dind
+      alias: docker
+  image: docker
+  before_script:
+    - apk add git
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+docker_other:
+  extends: .docker_template
+  script:
+    - >-
+      docker build
+      --cache-from ${CI_REGISTRY_IMAGE}/base:main
+      --cache-from ${CI_REGISTRY_IMAGE}/base:${CI_COMMIT_REF_SLUG}
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t "${CI_REGISTRY_IMAGE}/base:${CI_COMMIT_REF_SLUG}"
+      -f ${CI_PROJECT_DIR}/server-ce/Dockerfile-base
+      ${CI_PROJECT_DIR}
+    - docker push ${CI_REGISTRY_IMAGE}/base:${CI_COMMIT_REF_SLUG}
+    - >-
+      docker build
+      --cache-from ${CI_REGISTRY_IMAGE}:main
+      --cache-from ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      --build-arg OVERLEAF_BASE_TAG=${CI_REGISTRY_IMAGE}/base:${CI_COMMIT_REF_SLUG}
+      --build-arg MONOREPO_REVISION=${CI_COMMIT_SHA}
+      -t "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}"
+      -f ${CI_PROJECT_DIR}/server-ce/Dockerfile
+      ${CI_PROJECT_DIR}
+    - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}
+  rules:
+    - if: $CI_COMMIT_BRANCH != "main"
+
+docker_main:
+  extends: .docker_template
+  script:
+    - >-
+      docker build
+      --cache-from ${CI_REGISTRY_IMAGE}/base:main
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t "${CI_REGISTRY_IMAGE}/base:main"
+      -t "${CI_REGISTRY_IMAGE}/base:latest"
+      -f ${CI_PROJECT_DIR}/server-ce/Dockerfile-base
+      ${CI_PROJECT_DIR}
+    - docker push ${CI_REGISTRY_IMAGE}/base:main
+    - docker push ${CI_REGISTRY_IMAGE}/base:latest
+    - >-
+      docker build
+      --cache-from ${CI_REGISTRY_IMAGE}:main
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      --build-arg OVERLEAF_BASE_TAG=${CI_REGISTRY_IMAGE}/base:main
+      --build-arg MONOREPO_REVISION=${CI_COMMIT_SHA}
+      -t "${CI_REGISTRY_IMAGE}:main"
+      -t "${CI_REGISTRY_IMAGE}:latest"
+      -f ${CI_PROJECT_DIR}/server-ce/Dockerfile
+      ${CI_PROJECT_DIR}
+    - docker push ${CI_REGISTRY_IMAGE}:main
+    - docker push ${CI_REGISTRY_IMAGE}:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
