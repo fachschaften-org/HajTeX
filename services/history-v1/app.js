@@ -155,7 +155,7 @@ async function startApp() {
   await app.setup()
 
   const port = parseInt(process.env.PORT, 10) || 3100
-  app.listen(port, err => {
+  app.listen(port, "0.0.0.0", err => {
     if (err) {
       console.error(err)
       process.exit(1)
