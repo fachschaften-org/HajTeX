@@ -4,12 +4,12 @@ MONOREPO_ROOT := ../
 HERE=$(shell pwd)
 export MONOREPO_REVISION := $(shell git rev-parse HEAD)
 export BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
-export OVERLEAF_BASE_BRANCH ?= sharelatex/sharelatex-base:$(BRANCH_NAME)
-export OVERLEAF_BASE_LATEST ?= sharelatex/sharelatex-base
-export OVERLEAF_BASE_TAG ?= sharelatex/sharelatex-base:$(BRANCH_NAME)-$(MONOREPO_REVISION)
-export OVERLEAF_BRANCH ?= sharelatex/sharelatex:$(BRANCH_NAME)
-export OVERLEAF_LATEST ?= sharelatex/sharelatex
-export OVERLEAF_TAG ?= sharelatex/sharelatex:$(BRANCH_NAME)-$(MONOREPO_REVISION)
+export OVERLEAF_BASE_BRANCH ?= registry.gitlab.fachschaften.org/tudo-fsinfo/admin/overleaf/base:$(BRANCH_NAME)
+export OVERLEAF_BASE_LATEST ?= registry.gitlab.fachschaften.org/tudo-fsinfo/admin/overleaf/base
+export OVERLEAF_BASE_TAG := registry.gitlab.fachschaften.org/tudo-fsinfo/admin/overleaf/base:$(BRANCH_NAME)-$(MONOREPO_REVISION)
+export OVERLEAF_BRANCH ?= registry.gitlab.fachschaften.org/tudo-fsinfo/admin/overleaf:$(BRANCH_NAME)
+export OVERLEAF_LATEST ?= registry.gitlab.fachschaften.org/tudo-fsinfo/admin/overleaf
+export OVERLEAF_TAG := registry.gitlab.fachschaften.org/tudo-fsinfo/admin/overleaf:$(BRANCH_NAME)-$(MONOREPO_REVISION)
 
 all: build-base build-community
 
