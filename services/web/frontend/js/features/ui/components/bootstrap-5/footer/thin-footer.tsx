@@ -16,7 +16,7 @@ function FooterItemLi({
   const textToDisplay = translatedText || text
 
   if (!href) {
-    return <li>{textToDisplay}</li>
+    return <li dangerouslySetInnerHTML={{ __html: textToDisplay }} />
   }
 
   const linkProps = {
